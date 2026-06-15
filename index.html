@@ -26,15 +26,19 @@
         const t2 = document.getElementById("t2")
         const t3 = document.getElementById("t3")
 
-        t1.value = `SET X 2\nPOS A1\nLOG X\nDELAY 1000\nLOG X\nGOTO A1\n`
+        t1.value = `SET X NUM 2\nPOS A1\nALERT X\nDELAY 1000\nMATH X X * X\nLOG X\nGOTO A1\n`
 
         const c1 = document.getElementById("c1")
 
         const vars = {}
 
         const commands = {
-            "SET": async (name, value) => {
-                vars[name] = vars[name] ?? parseFloat(value) ?? value
+            "SET": async (name, t, ...value) => {
+                let val
+                if(t == "STR") val = value.join(" ")
+                if(t == "NUM") val = parseFloat(value[0])
+                else val = vars[value[0]]
+                vars[name] = val
             },
             "DEL": async (name) => {
                 delete vars[name]
@@ -42,8 +46,17 @@
             "LOG": async (name) => {
                 console.log(vars[name])
             },
+            "ALERT": async (name) => {
+                alert(vars[name])
+            },
             "MATH": async (outName, a1, op, a2) => {
-                vars[outName] = exec(`${vars[a1]} ${op} ${vars[a2]}`)
+                switch (op) {
+                    case "+": vars[outName] = vars[a1] + vars[a2]; break;
+                    case "-": vars[outName] = vars[a1] - vars[a2]; break;
+                    case "*": vars[outName] = vars[a1] * vars[a2]; break;
+                    case "**": vars[outName] = vars[a1] ** vars[a2]; break;
+                    case "/": vars[outName] = vars[a1] / vars[a2]; break;
+                }
             },
             "DELAY": (time) => {
                 return new Promise(res => setTimeout(res, parseInt(time)))
@@ -51,11 +64,12 @@
         }
 
         async function run(line = "", lineNum = 0, lines = [""]) {
-            if (!line === "") return lineNum + 1;
+            if (line === "") return lineNum + 1;
             if (!line) return -1;
 
             const [cmd, ...args] = line.split(" ")
             // console.log(cmd, args)
+            // alert(cmd)
 
             if (lineNum == lines.length) {
                 return -1
@@ -76,7 +90,7 @@
                     await commands[cmd](...args);
                     return lineNum + 1
                 } catch (error) {
-                    alert(error)
+                    alert(line + error)
                     return -1
                 }
             }
@@ -84,7 +98,7 @@
             return lineNum + 1
         }
 
-        async function exec(inp = "") {
+        async function execute(inp = "") {
             const lines = inp.split("\n")
             console.log(lines);
 
@@ -97,7 +111,7 @@
             }
         }
 
-        exec(t1.value)
+        execute(t1.value)
     </script>
 </body>
 

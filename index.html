@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmallPL</title>
+    <style>
+        * {
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="c1"></canvas>
+    <p>Setup</p>
+    <textarea value="" id="t1"></textarea>
+    <p>Start</p>
+    <textarea value="" id="t2"></textarea>
+    <p>Loop</p>
+    <textarea value="" id="t3"></textarea>
+
+    <script>
+        const t1 = document.getElementById("t1")
+        const t2 = document.getElementById("t2")
+        const t3 = document.getElementById("t3")
+
+        t1.value = `SET X 2\nLOG X\n`
+
+        const c1 = document.getElementById("c1")
+
+        const vars = {}
+
+        const commands = {
+            "SET": (name, value) => {
+                vars[name] = vars[name] ?? parseFloat(value) ?? value
+            },
+            "LOG": (name) => {
+                console.log(vars[name])
+            },
+        }
+
+        function run(line = "", lineNum = 0, lines = [""]) {
+            if (!line === "") return lineNum + 1;
+            if (!line) return -1;
+
+            const [cmd, ...args] = line.split(" ")
+            // console.log(cmd, args)
+
+            if (lineNum == lines.length) {
+                return -1
+            }
+            if (cmd == "EXIT") {
+                return -1
+            }
+            else if (cmd == "GOTO") {
+                return lines.findIndex((v) => v == args[0])
+            }
+            else if (cmd == "POS") {
+                return lineNum + 1
+            }
+            else {
+                try {
+                    commands[cmd](...args);
+                    return lineNum + 1
+                } catch (error) {
+                    alert(error)
+                    return -1
+                }
+            }
+
+            return lineNum + 1
+        }
+
+        function exec(inp = "") {
+            const lines = inp.split("\n")
+            console.log(lines);
+            
+            var line = 0
+
+            while (1) {
+                const l = run(lines[line], line, lines)
+                if (l == -1) return
+                line = l
+            }
+        }
+
+        exec(t1.value)
+    </script>
+</body>
+
+</html>

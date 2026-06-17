@@ -1,3 +1,5 @@
+import { Runtime } from "./Runtime";
+
 export const commands = {
     async SET(runtime, name, type, ...value) {
         switch (type) {
@@ -20,6 +22,22 @@ export const commands = {
 
     async DEL(runtime, name) {
         runtime.deleteVar(name);
+    },
+
+    async CREATE_GAMEOBJECT(runtime, id) {
+        runtime.gameObjects[id] = { image: "", color: "", x: 0, y: 0, w: 0, h: 0, r: 0 };
+    },
+
+    async ACCES_GAMEOBJECT(runtime, id, key, value) {
+        runtime.gameObjects[id][key] = runtime.getVar(value);
+    },
+
+    async READ_GAMEOBJECT(runtime, name, id, key) {
+        runtime.setVar(name, gameObjects[id][key]);
+    },
+
+    async DEL_GAMEOBJECT(runtime, id) {
+        delete runtime.gameObjects[id];
     },
 
     async LOG(runtime, name) {
@@ -60,9 +78,38 @@ export const commands = {
         }
     },
 
+    async CANVAS(runtime = new Runtime(), bg) {
+        runtime.canvas.width = innerWidth;
+        runtime.canvas.height = innerHeight;
+        if (!bg) return;
+        runtime.ctx.fillStyle = bg;
+        runtime.fillRect(0, 0, canvas.width, canvas.height);
+    },
+
     async DELAY(runtime, ms) {
         await new Promise(resolve => {
             setTimeout(resolve, Number(ms));
         });
+    },
+
+    async DRAW(runtime = new Runtime(), id) {
+        const go = runtime.gameObjects[id];
+        if (!go) return;
+
+        //  { image: "", color: "", x: 0, y: 0, w: 0, h: 0, r: 0 };
+
+        if (go.color) {
+            runtime.ctx.fillStyle = go.color;
+            runtime.ctx.fillRect(go.x, go.y, go.w, go.h);
+        }
+        else {
+            runtime.ctx.drawImage(go.image, go.x, go.y, go.w, go.h);
+        }
+    },
+
+    async DRAW_ALL(runtime = new Runtime()) {
+        for (const gameObjectId in runtime.gameObjects) {
+            this.DRAW(runtime, gameObjectId);
+        }
     }
 };

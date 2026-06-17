@@ -1,28 +1,16 @@
 import { Runtime } from "./interpreter/Runtime.js";
 import { execute } from "./interpreter/Executor.js";
 
-const script = `
-SET X NUM 2
+fetch("/script.mws").then(res => res.text()).then(script => {
+    const runtime = new Runtime(
+        script
+            .split("\n")
+            .map(line => line.trim())
+    );
 
-POS LOOP
+    execute(runtime).catch(error => {
+        console.error(error);
+        alert(error.message);
+    });
+})
 
-ALERT X
-DELAY 1000
-
-MATH X X * X
-
-LOG X
-
-GOTO LOOP
-`;
-
-const runtime = new Runtime(
-    script
-        .split("\n")
-        .map(line => line.trim())
-);
-
-execute(runtime).catch(error => {
-    console.error(error);
-    alert(error.message);
-});

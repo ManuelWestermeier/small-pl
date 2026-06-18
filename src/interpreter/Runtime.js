@@ -3,7 +3,7 @@ export class Runtime {
         this.lines = lines;
         this.vars = {};
         this.labels = new Map();
-        this.camnvas = document.querySelector("canvas");
+        this.canvas = document.querySelector("canvas");
         this.ctx = this.canvas.getContext("2d");
         this.gameObjects = {};
 

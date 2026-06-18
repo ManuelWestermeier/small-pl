@@ -1,4 +1,4 @@
-import { Runtime } from "./Runtime";
+import { Runtime } from "./Runtime.js";
 
 export const commands = {
     async SET(runtime, name, type, ...value) {
@@ -83,7 +83,7 @@ export const commands = {
         runtime.canvas.height = innerHeight;
         if (!bg) return;
         runtime.ctx.fillStyle = bg;
-        runtime.fillRect(0, 0, canvas.width, canvas.height);
+        runtime.ctx.fillRect(0, 0, runtime.canvas.width, runtime.canvas.height);
     },
 
     async DELAY(runtime, ms) {
@@ -98,18 +98,20 @@ export const commands = {
 
         //  { image: "", color: "", x: 0, y: 0, w: 0, h: 0, r: 0 };
 
-        if (go.color) {
+        console.log(go);
+        
+        if (go.image) {
+            runtime.ctx.drawImage(go.image, go.x, go.y, go.w, go.h);
+        }
+        else if (go.color) {
             runtime.ctx.fillStyle = go.color;
             runtime.ctx.fillRect(go.x, go.y, go.w, go.h);
-        }
-        else {
-            runtime.ctx.drawImage(go.image, go.x, go.y, go.w, go.h);
         }
     },
 
     async DRAW_ALL(runtime = new Runtime()) {
         for (const gameObjectId in runtime.gameObjects) {
-            this.DRAW(runtime, gameObjectId);
+            commands.DRAW(runtime, gameObjectId);
         }
     }
 };

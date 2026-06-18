@@ -14,36 +14,45 @@ export async function execute(runtime) {
 
         const { command, args } = parsed;
 
-        switch (command) {
-            case "EXIT":
-                return;
-
-            case "POS":
-                pc++;
-                break;
-
-            case "GOTO": {
-                const target = runtime.labels.get(args[0]);
-
-                if (target === undefined) {
-                    throw new Error(`Unknown label: ${args[0]}`);
-                }
-
-                pc = target;
-                break;
-            }
-
-            default: {
-                const handler = commands[command];
-
-                if (!handler) {
-                    throw new Error(`Unknown command: ${command}`);
-                }
-
-                await handler(runtime, ...args);
-                pc++;
-                break;
-            }
+        if (command === "EXIT" || command === "HALT") {
+            return;
         }
+
+        if (command === "LABEL" || command === "POS") {
+            pc++;
+            continue;
+        }
+
+        const handler = commands[command];
+
+        if (!handler) {
+            throw new Error(`Unknown command: ${command}`);
+        }
+
+        const result = await handler(runtime, ...args);
+
+        if (result && typeof result.goto === "string") {
+            const target = runtime.labels.get(result.goto);
+
+            if (target === undefined) {
+                throw new Error(`Unknown label: ${result.goto}`);
+            }
+
+            pc = target;
+            continue;
+        }
+
+        if (command === "GOTO") {
+            const target = runtime.labels.get(args[0]);
+
+            if (target === undefined) {
+                throw new Error(`Unknown label: ${args[0]}`);
+            }
+
+            pc = target;
+            continue;
+        }
+
+        pc++;
     }
 }
